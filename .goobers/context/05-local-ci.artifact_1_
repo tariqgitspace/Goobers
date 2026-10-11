@@ -1,0 +1,21 @@
+go run ./test/deadcode -go go
+deadcode: WARNING: issue-state snapshot is older than 30 days (2026-09-07); refresh it before relying on issue state
+deadcode: 153 existing exemption-policy findings retained in frozen rollout baseline (use -policy-details to list)
+deadcode: no unreviewed unreachable functions
+go run ./test/ci
+==> fmt-check
+<== fmt-check (elapsed 2.474s)
+==> ci-policy
+ok  	github.com/goobers/goobers/test/cipolicy	0.012s
+ok  	github.com/goobers/goobers/test/ci	5.145s
+<== ci-policy (elapsed 8.424s)
+==> runtime-acquisitions
+ok  	github.com/goobers/goobers/test/ci	1.890s
+<== runtime-acquisitions (elapsed 2.329s)
+==> architecture-imports
+architectureimports: github.com/goobers/goobers/internal/prstatus (linux): unreviewed direct import github.com/goobers/goobers/internal/journal; chain: github.com/goobers/goobers/internal/prstatus -> github.com/goobers/goobers/internal/journal
+exit status 1
+<== architecture-imports (elapsed 16.699s)
+ci: architecture-imports: exit status 1
+exit status 1
+make: *** [Makefile:415: ci] Error 1
