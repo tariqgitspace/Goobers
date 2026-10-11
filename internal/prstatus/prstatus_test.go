@@ -101,6 +101,13 @@ func TestPublishForwardsRequestAndWritesExactResult(t *testing.T) {
 	if string(data) != want {
 		t.Fatalf("result bytes = %s, want %s", data, want)
 	}
+	info, err := os.Stat(resultFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := info.Mode().Perm(); got != 0o600 {
+		t.Fatalf("result mode = %o, want 600", got)
+	}
 }
 
 func TestPublishReturnsOriginalPublisherErrors(t *testing.T) {
