@@ -593,3 +593,11 @@ func TestMakeContainedDirRejectsLexicalEscapes(t *testing.T) {
 		t.Fatalf("contained dir not created: %v", err)
 	}
 }
+
+func TestEscapesWorkspace(t *testing.T) {
+	for rel, want := range map[string]bool{"..": true, "../x": true, "a/b": false, "..a": false} {
+		if got := escapesWorkspace(rel); got != want {
+			t.Errorf("escapesWorkspace(%q) = %v, want %v", rel, got, want)
+		}
+	}
+}

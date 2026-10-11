@@ -341,8 +341,11 @@ func collectOutboxFiles(workspaceRoot string, declared []string) ([]journal.Outb
 			opts.SkipHiddenDirs = false
 			walkErr := mcpio.WalkFiles(full, func(p string, d fs.DirEntry) error {
 				rel, err := filepath.Rel(resolvedRoot, p)
-				if err != nil || rel == ".." || strings.HasPrefix(rel, "../") {
+				if err != nil {
 					return fmt.Errorf("resolve outbox file %q relative to workspace: %w", p, err)
+				}
+				if escapesWorkspace(rel) {
+					return fmt.Errorf("outbox file %q escapes the workspace", p)
 				}
 				fi, err := d.Info()
 				if err != nil {
@@ -394,4 +397,8 @@ func newOutboxLimitError(candidates []outboxCandidate, totalBytes int64) *outbox
 		ByteLimit:      journal.MaxOutboxBytesPerAttempt,
 		LargestFiles:   diagnostics,
 	}
+}
+
+func escapesWorkspace(rel string) bool {
+	return rel == ".." || strings.HasPrefix(rel, "../")
 }
