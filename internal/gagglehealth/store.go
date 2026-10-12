@@ -264,7 +264,7 @@ func appendEvent(path string, event apiv1.GaggleHealthEvent) error {
 		}
 		_ = file.Close()
 		if rbErr != nil {
-			return fmt.Errorf("%w (journal rollback failed: %v)", cause, rbErr)
+			return fmt.Errorf("%w (journal rollback failed: %w)", cause, rbErr)
 		}
 		return cause
 	}

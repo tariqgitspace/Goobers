@@ -1,5 +1,4 @@
 {"tool":"list_inputs","success":true}
+{"tool":"read_input","input":"review.verdict","inputDigest":"sha256:66671824e32fe085bac4bc094159574bbd7233ed34178494de141d085ee157b4","success":true,"startLine":1,"endLine":1,"totalLines":1}
 {"tool":"read_input","input":"query-backlog.artifact[0]","inputDigest":"sha256:274619d86215162facc384f3d30c11f5e7c3044e0ae25712369a751149fbcacc","success":true,"startLine":1,"endLine":1,"totalLines":1}
-{"tool":"read_input","input":"review.verdict","inputDigest":"sha256:9ef9512cb1cd2819fd9344ee535c23e403564d1e57515d69b6a78b3ffb20aa8e","success":true,"startLine":1,"endLine":1,"totalLines":1}
-{"tool":"read_input","input":"local-ci.artifact[0]","inputDigest":"sha256:26205ed10d931023bd44accee3f77b0bb96fe27132f7555668e6746c6f5aae62","success":true,"startLine":1,"endLine":10,"totalLines":10}
-{"tool":"read_input","input":"local-ci.artifact[1]","inputDigest":"sha256:6db8662557dde2ecd631127cbc14608c7c0f4afeb3652031c6e6a51ef9c837f0","success":true,"startLine":1,"endLine":6,"totalLines":6}
+{"tool":"read_input","input":"local-ci.artifact[0]","inputDigest":"sha256:ca038d500dc68aba95f03f397e0d2327b396ecf4e24cb13875af19cb95df9ea5","success":true,"startLine":1,"endLine":45,"totalLines":45}
