@@ -31,8 +31,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"net/url"
-	"path/filepath"
+	"github.com/goobers/goobers/internal/sqliteuri"
 	"runtime"
 	"strings"
 	"sync"
@@ -447,7 +446,7 @@ func isMissingTable(err error) bool {
 // correctness one, and failing Open because a pool could not be created would
 // turn an optimization into an outage. The fallback is the writer handle.
 func openReaderPool(path string) *sql.DB {
-	uri := fileURI(path)
+	uri := sqliteuri.FromPath(path)
 	if uri == "" {
 		return nil
 	}
@@ -488,25 +487,6 @@ func readerPoolSize() int {
 
 // fileURI converts an OS path to a SQLite file: URI, which mode=ro requires.
 //
-// SQLite's URI parser treats backslashes as ordinary characters, so a Windows
-// path needs forward slashes, and a drive-letter path needs the leading slash
-// that makes it absolute. Escaping matters too: an unescaped space truncates the
-// DSN at the space.
-func fileURI(path string) string {
-	if path == "" || strings.Contains(path, "?") {
-		return ""
-	}
-	abs, err := filepath.Abs(path)
-	if err != nil {
-		return ""
-	}
-	slashed := filepath.ToSlash(abs)
-	if !strings.HasPrefix(slashed, "/") {
-		slashed = "/" + slashed
-	}
-	return "file://" + (&url.URL{Path: slashed}).EscapedPath()
-}
-
 // Feed returns the store's single change feed, constructing it on first use.
 //
 // One feed per store is a correctness requirement, not a convenience (#2458).

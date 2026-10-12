@@ -43,9 +43,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"net/url"
+	"github.com/goobers/goobers/internal/sqliteuri"
 	"path/filepath"
-	"strings"
 	"time"
 
 	sqlite "modernc.org/sqlite"
@@ -89,7 +88,7 @@ type Marker struct {
 // and requiring an owner would mean a run started by `goobers run` while the
 // daemon is down records nothing.
 func Open(path string) (*Store, error) {
-	db, err := sql.Open("sqlite", fileURI(path)+dsnParams)
+	db, err := sql.Open("sqlite", intakeURI(path)+dsnParams)
 	if err != nil {
 		return nil, fmt.Errorf("intake: open %s: %w", path, err)
 	}
@@ -440,24 +439,6 @@ func PathFor(instanceDir string) string { return filepath.Join(instanceDir, File
 
 // fileURI renders a path as a file: URI so DSN parameters apply.
 //
-// The absolute path must be given a leading slash before it reaches url.URL.
-// On Windows filepath.ToSlash yields "C:/dir/intake.db", whose first segment
-// contains a colon; url.URL.String then prefixes "./" so the segment cannot be
-// mistaken for a scheme, producing "file:./C:/dir/intake.db" — a relative URI
-// SQLite cannot open (SQLITE_CANTOPEN). Rooting the path first yields
-// "file:///C:/dir/intake.db". POSIX paths are already rooted and unaffected.
-func fileURI(path string) string {
-	absolute, err := filepath.Abs(path)
-	if err != nil {
-		absolute = path
-	}
-	slashed := filepath.ToSlash(absolute)
-	if !strings.HasPrefix(slashed, "/") {
-		slashed = "/" + slashed
-	}
-	return "file://" + (&url.URL{Path: slashed}).EscapedPath()
-}
-
 // Store satisfies readmodel.Intake. The assertion lives here rather than in
 // readmodel, which must not import this package: intake is a SEPARATE database
 // with its own lifecycle, and a dependency from the projected-facts store to the
@@ -466,3 +447,11 @@ var _ interface {
 	Observed(ctx context.Context, runID string, journalSeq uint64) error
 	Removing(ctx context.Context, runID string) error
 } = (*Store)(nil)
+
+func intakeURI(path string) string {
+	absolute, err := filepath.Abs(path)
+	if err != nil {
+		absolute = path
+	}
+	return sqliteuri.File(absolute)
+}

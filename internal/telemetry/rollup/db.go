@@ -5,11 +5,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"net/url"
+	"github.com/goobers/goobers/internal/sqliteuri"
 	"os"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"sync"
 	"time"
 
@@ -153,7 +152,7 @@ func Open(path string) (*DB, error) {
 // migrating, or writing it. It is used by offline readers that must leave the
 // instance unchanged.
 func OpenExistingReader(ctx context.Context, path string) (*DB, error) {
-	uri := fileURI(path)
+	uri := sqliteuri.FromPath(path)
 	if uri == "" {
 		return nil, errors.New("rollup: existing database path is required")
 	}
@@ -233,7 +232,7 @@ func openReaderPool(path string) *sql.DB {
 	// literal path left of the "?" to avoid URI-encoding pitfalls with Windows
 	// backslashes and drive letters. So the URI is built explicitly here rather
 	// than by string concatenation.
-	uri := fileURI(path)
+	uri := sqliteuri.FromPath(path)
 	if uri == "" {
 		return nil
 	}
@@ -271,25 +270,6 @@ func readerPoolSize() int {
 
 // fileURI converts an OS path to a SQLite file: URI.
 //
-// SQLite's URI parser treats backslashes as ordinary characters, so a Windows
-// path must use forward slashes, and a drive-letter path needs the leading
-// slash that makes it absolute.
-func fileURI(path string) string {
-	if path == "" || strings.Contains(path, "?") {
-		// A path already carrying query syntax cannot be safely appended to.
-		return ""
-	}
-	abs, err := filepath.Abs(path)
-	if err != nil {
-		return ""
-	}
-	slashed := filepath.ToSlash(abs)
-	if !strings.HasPrefix(slashed, "/") {
-		slashed = "/" + slashed
-	}
-	return "file://" + (&url.URL{Path: slashed}).EscapedPath()
-}
-
 // Close closes both handles. The reader is closed first so no query is in
 // flight against a database whose writer is going away.
 func (db *DB) Close() error {

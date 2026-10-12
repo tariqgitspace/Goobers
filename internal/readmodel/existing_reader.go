@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/goobers/goobers/internal/sqliteuri"
 	"io"
 	"time"
 )
@@ -41,7 +42,7 @@ func (r *ExistingReader) CountOutcomeVerdict(ctx context.Context, verdict string
 // reads. mode=ro prevents creation and mutations; unlike immutable=1 it still
 // sees committed WAL updates from a running daemon.
 func OpenExistingReader(ctx context.Context, path string) (*ExistingReader, error) {
-	uri := fileURI(path)
+	uri := sqliteuri.FromPath(path)
 	if uri == "" {
 		return nil, fmt.Errorf("readmodel: existing database path is required")
 	}
