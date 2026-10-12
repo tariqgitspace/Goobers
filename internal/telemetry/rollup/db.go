@@ -5,13 +5,13 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/goobers/goobers/internal/sqliteuri"
 	"os"
 	"path/filepath"
 	"runtime"
 	"sync"
 	"time"
 
+	"github.com/goobers/goobers/internal/sqliteuri"
 	sqlite "modernc.org/sqlite" // pure-Go driver: no cgo, matches the local-runner's
 	// single-binary/no-service-dependency posture (ARCHITECTURE.md §3.1).
 )
@@ -268,8 +268,6 @@ func readerPoolSize() int {
 	return n
 }
 
-// fileURI converts an OS path to a SQLite file: URI.
-//
 // Close closes both handles. The reader is closed first so no query is in
 // flight against a database whose writer is going away.
 func (db *DB) Close() error {

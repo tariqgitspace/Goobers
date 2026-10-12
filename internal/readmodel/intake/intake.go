@@ -43,10 +43,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/goobers/goobers/internal/sqliteuri"
 	"path/filepath"
 	"time"
 
+	"github.com/goobers/goobers/internal/sqliteuri"
 	sqlite "modernc.org/sqlite"
 )
 
@@ -437,8 +437,6 @@ func (s *Store) OldestPending(ctx context.Context) (time.Time, bool, error) {
 // PathFor returns the intake store's path inside an instance directory.
 func PathFor(instanceDir string) string { return filepath.Join(instanceDir, FileName) }
 
-// fileURI renders a path as a file: URI so DSN parameters apply.
-//
 // Store satisfies readmodel.Intake. The assertion lives here rather than in
 // readmodel, which must not import this package: intake is a SEPARATE database
 // with its own lifecycle, and a dependency from the projected-facts store to the

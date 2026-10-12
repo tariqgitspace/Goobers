@@ -31,12 +31,12 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/goobers/goobers/internal/sqliteuri"
 	"runtime"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/goobers/goobers/internal/sqliteuri"
 	sqlite "modernc.org/sqlite" // pure-Go driver, matching the rest of the tree
 )
 
@@ -485,8 +485,6 @@ func readerPoolSize() int {
 	return n
 }
 
-// fileURI converts an OS path to a SQLite file: URI, which mode=ro requires.
-//
 // Feed returns the store's single change feed, constructing it on first use.
 //
 // One feed per store is a correctness requirement, not a convenience (#2458).

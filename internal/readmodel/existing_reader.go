@@ -5,9 +5,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/goobers/goobers/internal/sqliteuri"
 	"io"
 	"time"
+
+	"github.com/goobers/goobers/internal/sqliteuri"
 )
 
 // ErrExistingProjectionUnavailable means read.db exists but cannot serve this
