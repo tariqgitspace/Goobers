@@ -237,6 +237,8 @@ func (s *Store) writeSnapshot(snapshot apiv1.GaggleHealthSnapshot) error {
 	return nil
 }
 
+var syncJournal = func(f *os.File) error { return f.Sync() }
+
 func appendEvent(path string, event apiv1.GaggleHealthEvent) error {
 	data, err := json.Marshal(event)
 	if err != nil {
@@ -249,12 +251,23 @@ func appendEvent(path string, event apiv1.GaggleHealthEvent) error {
 	if err != nil {
 		return fmt.Errorf("gagglehealth: open journal: %w", err)
 	}
-	if _, err := file.Write(append(data, '\n')); err != nil {
+	info, err := file.Stat()
+	if err != nil {
 		_ = file.Close()
+		return fmt.Errorf("gagglehealth: stat journal: %w", err)
+	}
+	size := info.Size()
+	rollback := func() {
+		_ = file.Truncate(size)
+		_ = file.Sync()
+		_ = file.Close()
+	}
+	if _, err := file.Write(append(data, '\n')); err != nil {
+		rollback()
 		return fmt.Errorf("gagglehealth: append journal: %w", err)
 	}
-	if err := file.Sync(); err != nil {
-		_ = file.Close()
+	if err := syncJournal(file); err != nil {
+		rollback()
 		return fmt.Errorf("gagglehealth: sync journal: %w", err)
 	}
 	if err := file.Close(); err != nil {

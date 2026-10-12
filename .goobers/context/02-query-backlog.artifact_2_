@@ -1,1 +1,1 @@
-claimed 7264: test: flake.Quarantine has 0% coverage
+claimed 7276: gagglehealth journal Append failure can leave a torn or duplicate-sequence record, making the store unopenable

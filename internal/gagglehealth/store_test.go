@@ -2,6 +2,7 @@ package gagglehealth
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -283,6 +284,47 @@ func TestStoreAppendSucceedsWhenProjectionWriteFailsAfterCommit(t *testing.T) {
 		t.Fatalf("retry-sequence append: %v", err)
 	}
 	if err := store.Close(); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestStoreFailedAppendRollsBackJournal(t *testing.T) {
+	now := time.Date(2026, 10, 2, 12, 0, 0, 0, time.UTC)
+	root := t.TempDir()
+	store, err := openStore(root, fixedRetention(24*time.Hour), func() time.Time { return now })
+	if err != nil {
+		t.Fatal(err)
+	}
+	identity := apiv1.GaggleHealthIdentity{Gaggle: "alpha"}
+	key, err := EpisodeKey(FindingNoProgress, identity)
+	if err != nil {
+		t.Fatal(err)
+	}
+	opened := event(1, now, apiv1.GaggleHealthFindingOpened, finding(FindingNoProgress, key, identity, now, apiv1.GaggleHealthStalled))
+	path := filepath.Join(root, "health", "events.jsonl")
+
+	original := syncJournal
+	t.Cleanup(func() { syncJournal = original })
+	syncJournal = func(*os.File) error { return errors.New("injected sync failure") }
+	if _, err := store.Append(opened); err == nil {
+		t.Fatal("Append succeeded despite sync failure")
+	}
+	if info, err := os.Stat(path); err != nil || info.Size() != 0 {
+		t.Fatalf("journal after failed append: info=%v err=%v, want empty", info, err)
+	}
+
+	syncJournal = original
+	if _, err := store.Append(opened); err != nil {
+		t.Fatalf("retry append: %v", err)
+	}
+	if err := store.Close(); err != nil {
+		t.Fatal(err)
+	}
+	reopened, err := openStore(root, fixedRetention(24*time.Hour), func() time.Time { return now })
+	if err != nil {
+		t.Fatalf("reopen after failed+retried append: %v", err)
+	}
+	if err := reopened.Close(); err != nil {
 		t.Fatal(err)
 	}
 }
