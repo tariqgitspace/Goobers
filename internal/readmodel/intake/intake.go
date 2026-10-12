@@ -48,8 +48,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/goobers/goobers/internal/sqliteschema"
 	sqlite "modernc.org/sqlite"
+
+	"github.com/goobers/goobers/internal/sqliteschema"
 )
 
 // FileName is the intake store's name inside the instance directory.
