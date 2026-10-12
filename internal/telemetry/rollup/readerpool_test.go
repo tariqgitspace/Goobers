@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/goobers/goobers/internal/sqliteuri"
 	"os"
 	"path/filepath"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/goobers/goobers/internal/sqliteuri"
 )
 
 // TestReaderPoolAllowsConcurrentReads pins the property #1916 exists for.

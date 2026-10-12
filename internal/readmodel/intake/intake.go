@@ -46,8 +46,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/goobers/goobers/internal/sqliteuri"
 	sqlite "modernc.org/sqlite"
+
+	"github.com/goobers/goobers/internal/sqliteuri"
 )
 
 // FileName is the intake store's name inside the instance directory.
