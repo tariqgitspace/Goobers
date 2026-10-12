@@ -212,6 +212,12 @@ Implement the claimed issue end to end: read the issue and its acceptance criter
 - query-backlog.artifact[0]: available at `.goobers/context/00-query-backlog.artifact_0_`
 - query-backlog.artifact[1]: available at `.goobers/context/01-query-backlog.artifact_1_`
 - query-backlog.artifact[2]: available at `.goobers/context/02-query-backlog.artifact_2_`
+- review.verdict: available at `.goobers/context/05-review.verdict`
+- learning.episode[26]: available at `.goobers/context/04-learning.episode_26_`
+- review.verdict: available at `.goobers/context/05-review.verdict`
+- local-ci.artifact[0]: available at `.goobers/context/06-local-ci.artifact_0_`
+- local-ci.artifact[1]: available at `.goobers/context/07-local-ci.artifact_1_`
+- learning.episode[49]: available at `.goobers/context/08-learning.episode_49_`
 
 ## Scratch files
 
