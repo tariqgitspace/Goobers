@@ -256,6 +256,59 @@ func TestStoreRepairsTornFinalAppendOnRestart(t *testing.T) {
 	}
 }
 
+func TestStoreRepairsTerminatedUndecodableTailButRejectsMidFileCorruption(t *testing.T) {
+	now := time.Date(2026, 10, 2, 12, 0, 0, 0, time.UTC)
+	root := t.TempDir()
+	store, err := openStore(root, fixedRetention(24*time.Hour), func() time.Time { return now })
+	if err != nil {
+		t.Fatal(err)
+	}
+	identity := apiv1.GaggleHealthIdentity{Gaggle: "alpha"}
+	key, err := EpisodeKey(FindingNoProgress, identity)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := store.Append(event(1, now, apiv1.GaggleHealthFindingOpened,
+		finding(FindingNoProgress, key, identity, now, apiv1.GaggleHealthStalled))); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.Close(); err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(root, "health", "events.jsonl")
+	good, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, append(append([]byte(nil), good...), []byte("{\"schemaVers\n")...), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	restarted, err := openStore(root, fixedRetention(24*time.Hour), func() time.Time { return now })
+	if err != nil {
+		t.Fatalf("open with torn terminated tail: %v", err)
+	}
+	if got, _ := os.ReadFile(path); string(got) != string(good) {
+		t.Fatalf("journal not repaired: %q", got)
+	}
+	if _, err := restarted.Append(event(2, now.Add(time.Minute), apiv1.GaggleHealthFindingUpdated,
+		finding(FindingNoProgress, key, identity, now.Add(time.Minute), apiv1.GaggleHealthStalled))); err != nil {
+		t.Fatal(err)
+	}
+	if err := restarted.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	full, _ := os.ReadFile(path)
+	corrupt := append(append([]byte("garbage\n"), full...), 0)
+	corrupt = corrupt[:len(corrupt)-1]
+	if err := os.WriteFile(path, corrupt, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := openStore(root, fixedRetention(24*time.Hour), func() time.Time { return now }); err == nil {
+		t.Fatal("open accepted mid-file corruption")
+	}
+}
+
 func TestStoreAppendSucceedsWhenProjectionWriteFailsAfterCommit(t *testing.T) {
 	now := time.Date(2026, 10, 2, 12, 0, 0, 0, time.UTC)
 	root := t.TempDir()
